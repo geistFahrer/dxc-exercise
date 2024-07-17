@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Lambda function to fetch value from Ssm parameter and upload in s3
+
+Resources:
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaSsmPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource: 
+                  - 'arn:aws:ssm:us-east-1:954487986556:parameter/Name'
+                  - 'arn:aws:ssm:us-east-1:954487986556:parameter/Value'
+        - PolicyName: LambdaS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: 'arn:aws:s3:::dxc-exercise-parameter/*'
+        - PolicyName: LambdaCloudWatchPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  ExerciseLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: org.bishu.ExerciseLambda::handleRequest
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: dxc-cloud-formation-template
+        S3Key: exercise-lambda-1.0-SNAPSHOT.jar
+      Runtime: java17 
+      Timeout: 60
+
+Outputs:
+  LambdaFunctionArn:
+    Description: "ARN of the Lambda Function"
+    Value: !GetAtt ExerciseLambda.Arn
