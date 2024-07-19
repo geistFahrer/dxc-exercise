@@ -21,8 +21,8 @@ Resources:
                 Action:
                   - ssm:GetParameters
                 Resource: 
-                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${nameKey}'
-                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${valueKey}'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${NameKey}'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ValueKey}'
         - PolicyName: LambdaS3Policy
           PolicyDocument:
             Version: '2012-10-17'
