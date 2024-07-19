@@ -30,7 +30,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:PutObject
-                Resource: 'arn:aws:s3:::dxc-exercise-parameter/*'
+                Resource: !Sub 'arn:aws:s3:::${S3BucketToStoreParameter}/*'
         - PolicyName: LambdaCloudWatchPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -62,6 +62,10 @@ Parameters:
     Description: Key for the ssm parameter value.
     Type: String
     Default: Value
+  S3BucketToStoreParameter:
+    Description: S3 bucket where the SSM parameter values will be stored by Lambda function.
+    Type: String
+    Default: dxc-exercise-parameter
   LambdaHandler:
     Description: Lambda handler function's class qualified name::function name.
     Type: String
@@ -69,7 +73,7 @@ Parameters:
   S3BucketNameForLambdaJar:
     Description: S3 bucket where lambda jar is kept.
     Type: String
-    Default: lambda-jars
+    Default: dxc-assignment-lambda-jars
   LambdaJarName:
     Description: Lambda jar file name with extension
     Type: String
