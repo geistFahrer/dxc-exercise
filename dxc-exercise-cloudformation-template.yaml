@@ -21,8 +21,8 @@ Resources:
                 Action:
                   - ssm:GetParameters
                 Resource: 
-                  - 'arn:aws:ssm:us-east-1:954487986556:parameter/Name'
-                  - 'arn:aws:ssm:us-east-1:954487986556:parameter/Value'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${nameKey}'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${valueKey}'
         - PolicyName: LambdaS3Policy
           PolicyDocument:
             Version: '2012-10-17'
@@ -40,20 +40,43 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: '*'
+                Resource: 'arn:aws:logs:*:*:*'
 
   ExerciseLambda:
     Type: 'AWS::Lambda::Function'
     Properties:
-      Handler: org.bishu.ExerciseLambda::handleRequest
+      Handler: !Ref LambdaHandler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        S3Bucket: dxc-cloud-formation-template
-        S3Key: exercise-lambda-1.0-SNAPSHOT.jar
-      Runtime: java17 
+        S3Bucket: !Ref S3BucketNameForLambdaJar
+        S3Key: !Ref LambdaJarName
+      Runtime: java17
       Timeout: 60
+
+Parameters:
+  NameKey:
+    Description: Key for the ssm parameter name.
+    Type: String
+    Default: Name
+  ValueKey:
+    Description: Key for the ssm parameter value.
+    Type: String
+    Default: Value
+  LambdaHandler:
+    Description: Lambda handler function's class qualified name::function name.
+    Type: String
+    Default: org.bishu.ExerciseLambda::handleRequest
+  S3BucketNameForLambdaJar:
+    Description: S3 bucket where lambda jar is kept.
+    Type: String
+    Default: lambda-jars
+  LambdaJarName:
+    Description: Lambda jar file name with extension
+    Type: String
+    Default: exercise-lambda-1.0-SNAPSHOT.jar
+
 
 Outputs:
   LambdaFunctionArn:
-    Description: "ARN of the Lambda Function"
+    Description: "ARN of the Lambda Function which fetches parameter from SSM and store in S3."
     Value: !GetAtt ExerciseLambda.Arn
